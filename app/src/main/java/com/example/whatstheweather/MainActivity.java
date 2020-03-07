@@ -6,17 +6,25 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity {
+    EditText editText;
+    TextView textView;
 
     public class Download extends AsyncTask<String,Void,String > {
 
@@ -41,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
                 return result;
             }catch(Exception e){
                 e.printStackTrace();
+                Toast.makeText(getApplicationContext(), "Couldn't find Weather", Toast.LENGTH_SHORT).show();
                 Log.i("error", "doInBackground: ");
                 return null;
             }
@@ -57,15 +66,22 @@ public class MainActivity extends AppCompatActivity {
 
                 JSONArray jsonArray=new JSONArray(weather);
                 int i;
+                String result="";
                 for(i=0;i<jsonArray.length();i++)
                 {
                     JSONObject ob=jsonArray.getJSONObject(i);
-                    Log.i("main",ob.getString("main"));
-                    Log.i("description",ob.getString("description"));
+                    String main=ob.getString("main");
+                    String description=ob.getString("description");
+                    if(!main.equals("") && !description.equals("")) {
+                        result += main + " : " + description;
+                        result += '\n';
+                    }
                 }
+                textView.setText(result);
 
             } catch (Exception e) {
                 Log.i("error", "onPostExecute: ");
+                Toast.makeText(getApplicationContext(), "Couldn't find Weather", Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
             }
         }
@@ -73,7 +89,15 @@ public class MainActivity extends AppCompatActivity {
 
     public void getWeather(View view){
         Download download=new Download();
-        download.execute("https://samples.openweathermap.org/data/2.5/weather?lat=35&lon=139&appid=b6907d289e10d714a6e88b30761fae22");
+        try {
+            String encoded= URLEncoder.encode(editText.getText().toString(),"UTF-8");
+            String result=download.execute("https://openweathermap.org/data/2.5/weather?q="+encoded+"&appid=b6907d289e10d714a6e88b30761fae22").get();
+            InputMethodManager manager=(InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            manager.hideSoftInputFromWindow(editText.getWindowToken(),0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "Couldn't find Weather", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -81,5 +105,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        editText=findViewById(R.id.editText);
+        textView=findViewById(R.id.textView2);
     }
 }
