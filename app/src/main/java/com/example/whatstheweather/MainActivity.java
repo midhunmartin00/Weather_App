@@ -2,6 +2,7 @@ package com.example.whatstheweather;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.net.UrlQuerySanitizer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -49,7 +50,12 @@ public class MainActivity extends AppCompatActivity {
                 return result;
             }catch(Exception e){
                 e.printStackTrace();
-                Toast.makeText(getApplicationContext(), "Couldn't find Weather", Toast.LENGTH_SHORT).show();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), "Couldn't find Weather", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 Log.i("error", "doInBackground: ");
                 return null;
             }
@@ -58,8 +64,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            Log.i("json",s);
             try {
+                Log.i("json",s);
                 JSONObject jsonObject=new JSONObject(s);
                 String weather=jsonObject.getString("weather");
                 Log.i("weather",weather);
