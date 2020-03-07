@@ -48,6 +48,7 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_marginTop="50dp"
+        android:onClick="getWeather"
         android:text="what's the weather"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
